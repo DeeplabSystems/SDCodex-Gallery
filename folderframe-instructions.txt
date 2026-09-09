@@ -1,0 +1,797 @@
+
+OVERVIEW
+
+Configure media paths and separate index/embed startup defaults in
+folderframe.config.json. See CONFIGURATION.md for examples, including autoplay.
+
+This is a lightweight, self-hosted photo and video gallery. It reads the
+contents of the photos/ directory dynamically from the web server’s
+directory listing, so there is no database, import process, or manually
+maintained media list.
+
+The gallery supports: - Thumbnail grid view - Subfolders as albums,
+including nested albums - Breadcrumb navigation - JPG, JPEG, PNG, WebP, GIF,
+AVIF, BMP, and HEIC/HEIF images - MP4, MOV, WEBM, and M4V video detection/playback (browser codec
+support still applies) - Content-aware handling of mislabeled HEIC
+files - Slideshow playback with selectable intervals - Shuffle mode -
+Configurable automatic folder rescanning - TV / photo-frame mode -
+Zoom, pan, pinch zoom, Original Size and Fit Screen - Fullscreen /
+theater mode - Saved preferences using browser localStorage - URL
+options for dedicated slideshow/TV bookmarks
+
+IMPORTANT: DO NOT OPEN index.html DIRECTLY
+
+Browsers restrict directory scanning when a page is opened with the
+file:// protocol. The gallery must be served over HTTP or HTTPS by a web
+server that provides directory listings for photos/ and its subfolders.
+
+PROJECT LAYOUT
+
+The photos/ folder included in the GitHub repository contains test photos and
+videos for checking various supported media formats. These sample files are
+not required to use SDCodex-Gallery; replace them with your own media or configure
+a different source folder.
+
+Keep the files arranged like this:
+
+    SDCodex-Gallery/
+    ├── index.html
+    ├── styles.css
+    ├── app.js
+    ├── resilience.js
+    ├── settings.js
+    ├── folderframe.config.json
+    ├── heic2any.min.js
+    ├── generate_thumbnails.py  (optional)
+    └── photos/
+        ├── photo1.jpg
+        ├── photo2.heic
+        ├── video1.mp4
+        ├── Family/
+        │   ├── birthday.jpg
+        │   └── 2026/
+        │       └── vacation.jpg
+        └── Vacations/
+            └── OBX/
+                └── beach.jpg
+
+Subfolders under photos/ automatically appear as albums.
+
+OPTIONAL GENERATED THUMBNAILS
+
+Large libraries can use a parallel directory of small WebP grid previews.
+Add thumbnailPath to the matching source in folderframe.config.json:
+
+    { "id": "photos", "label": "Photos", "path": "photos/",
+      "thumbnailPath": "thumbnails/" }
+
+Then install Pillow and generate the tree:
+
+    python -m pip install Pillow
+    python generate_thumbnails.py photos thumbnails
+
+Install pillow-heif too for HEIC/HEIF input. A file at
+photos/Family/image.jpg maps to thumbnails/Family/image.jpg.webp.
+Missing previews fall back to the original for browser-native images.
+HEIC/HEIF grid tiles and album covers use generated previews only; a missing
+or broken preview keeps the HEIC or folder placeholder instead of running
+heic2any for every visible tile. Opening the item still uses the full viewer
+HEIC and QuickTime reclassification path.
+When an album contains only folders, SDCodex-Gallery performs a bounded descendant
+search and flows the first usable image up as its cover. It stops after four
+levels or twelve directory listings per visible album card.
+
+FOLDER EXCLUSIONS
+
+Place an empty folderframe.ignore file inside any media folder to exclude that
+folder and every subfolder. .frameignore is also recognized when your web server
+shows dotfiles; folderframe.ignore is more reliable on ordinary static servers.
+The live scanner and generate_thumbnails.py follow the same rule. SDCodex-Gallery
+also skips common OS/NAS recycle, metadata, snapshot, and index folders,
+dotfiles/resource forks, and temporary/partial/backup files. It does not guess
+that folders named thumbnails, cache, private, originals, or exports are hidden.
+
+OPTIONAL SCAN MANIFEST
+
+For a large recursive source, add "scanCache": true to that source in
+folderframe.config.json. SDCodex-Gallery stores a lean manifest in browser localStorage
+and validates each visited directory with an HTTP Last-Modified HEAD response.
+Unchanged listings are reused; changed listings are downloaded and parsed again.
+The manifest records directory/media paths and available timestamp, size, and
+thumbnail-path metadata. It requires no database, PHP, build step, or writable
+server directory. Missing/invalid/full browser storage, or a server without a usable
+directory timestamp, safely falls back to the normal full scan. Clearing site data
+removes the manifest and the next scan rebuilds it.
+
+OPTIONAL PERSISTENT MEDIA INDEX
+
+Very large or Immich-mounted trees can use a lean JSON index stored in writable
+appdata and served as an ordinary static file. Add manifestPath to the source:
+
+    { "id": "photos", "label": "Photos", "path": "photos/",
+      "thumbnailPath": "thumbnails/",
+      "manifestPath": "folderframe-data/library.json",
+      "discoveryMode": "manifest" }
+
+Generate thumbnails and the index together:
+
+    python generate_thumbnails.py photos thumbnails --manifest folderframe-data/library.json
+
+Or update only the index:
+
+    python generate_thumbnails.py photos --manifest folderframe-data/library.json --manifest-only
+
+The helper creates library.json and an adjacent library.d directory. Serve both.
+Later runs compare directory mtimes and re-list only changed directories while
+reusing unchanged records.
+
+discoveryMode is configured per source:
+
+-   "auto" (default) tries the published manifest, then falls back to HTML
+    directory listings if it is unavailable or invalid.
+-   "directory" never requests the manifest and always uses directory listings.
+-   "manifest" requires a valid manifest and never attempts directory scanning.
+    This mode works on static hosts such as GitHub Pages or Cloudflare Pages.
+
+Strict manifest mode accepts a valid empty index, ignores browser scanCache, and
+continues to use thumbnailPath for grid and album previews. Missing/invalid index
+data or unreadable chunks show a published-library error with regenerate/redeploy
+guidance. The refresh button becomes Reload Library and cache-busts the published
+index; it cannot discover files not yet included in that index. Regenerate and
+redeploy library.json plus library.d after media changes. The browser reads the
+manifest but cannot write server appdata, so run the helper manually or on a
+schedule.
+
+Typical static package layout:
+
+    SDCodex-Gallery/
+    |-- index.html
+    |-- app.js
+    |-- folderframe.config.json
+    |-- photos/
+    |-- thumbnails/                 (optional)
+    `-- folderframe-data/
+        |-- library.json
+        `-- library.d/*.json
+
+OPTION 1 — QUICK LOCAL TEST WITH PYTHON
+
+Python’s built-in HTTP server is the easiest way to test or use the
+gallery on a local machine.
+
+1.  Open a terminal in the SDCodex-Gallery project directory.
+
+Example:
+
+    cd /home/grog/projects/SDCodex-Gallery
+
+2.  Start the server:
+
+    python3 -m http.server 8000
+
+3.  Open a browser on the same computer and visit:
+
+    http://localhost:8000
+
+4.  To access it from another device on the same LAN, use the server’s
+    LAN IP:
+
+    http://SERVER-IP:8000
+
+For example, if the server is 192.168.1.50:
+
+    http://192.168.1.50:8000
+
+Python’s built-in server automatically provides the directory listings
+the gallery needs, including listings for nested album folders.
+
+Stop the Python server with Ctrl+C.
+
+NOTE: Python’s built-in server is excellent for testing and trusted
+local-network use. For a permanent installation, use any static web
+server that can provide directory listings.
+
+OPTION 2 — HOSTING ON A WEB SERVER OR UNRAID
+
+SDCodex-Gallery is not tied to a specific web server. Apache, Nginx, Caddy,
+lighttpd, and similar servers can all work. On Unraid, use any suitable
+web-server container and map the SDCodex-Gallery directory into its web root.
+
+The web root should contain:
+
+    index.html
+    styles.css
+    app.js
+    resilience.js
+    settings.js
+    folderframe.config.json
+    heic2any.min.js
+    generate_thumbnails.py  (optional)
+    photos/
+
+Configure the server to return a browsable directory listing for photos/
+and every nested folder beneath it. The exact setting may be called
+directory listing, directory browsing, autoindex, or indexes depending on
+the server. SDCodex-Gallery only requires normal static-file serving plus
+those directory listings; it does not require PHP, a database, or a
+server-side application.
+
+On Unraid, map the SDCodex-Gallery project directory to the container’s web
+root, enable directory listings for photos/, and restart the container.
+Consult the selected container or web server’s documentation for its
+specific configuration syntax.
+
+Test directory listing directly by visiting:
+
+    http://SERVER-IP:PORT/photos/
+
+You should see a server-generated list of the files and folders in
+photos/.
+
+Then open:
+
+    http://SERVER-IP:PORT/
+
+to use the gallery.
+
+ADDING, REMOVING, AND ORGANIZING MEDIA
+
+MEDIA
+
+Add or remove files directly inside photos/ or any album subfolder.
+
+The gallery recognizes:
+
+Images: .jpg .jpeg .png .webp .gif .heic .heif
+
+Animated and static GIF files are displayed directly by the browser and
+participate in slideshows like other images.
+
+Browser-native images: .jpg .jpeg .png .webp .gif .avif .bmp
+Converted images: .heic .heif
+Videos: .mp4 .mov .webm .m4v
+
+AVIF and BMP display when supported by the browser. WEBM and M4V follow normal
+HTML5 video codec support, like MP4 and MOV. The thumbnail helper attempts AVIF
+and BMP with the installed Pillow stack and skips unsupported inputs cleanly.
+
+The browser must support the codec contained inside a video file. A .mov
+or .mp4 extension alone does not guarantee browser playback.
+
+ALBUMS
+
+Create folders inside photos/ to create albums.
+
+Example:
+
+    photos/
+    ├── Family/
+    ├── Kids/
+    └── Vacations/
+        ├── OBX 2026/
+        └── Disney/
+
+Folders appear as album cards. Albums can contain additional subfolders.
+
+Use the breadcrumb at the top of the gallery to move back through the
+album hierarchy.
+
+REFRESHING
+
+Open the gallery’s three-dot menu and choose “Refresh Folder” to scan
+immediately. Strict manifest sources show “Reload Library” instead.
+
+When Auto Refresh is enabled, the current folder is rescanned at the configured refreshInterval
+(default: one minute for index, five minutes for embed). The gallery also rescans when you return to the browser tab.
+
+This means newly added or removed media can appear without manually
+rebuilding anything.
+
+HEIC / HEIF SUPPORT
+
+The gallery includes the local heic2any.min.js decoder.
+
+For genuine HEIC/HEIF files, the browser can convert the image to JPEG
+for display when native browser rendering is unavailable.
+
+The gallery also performs content-aware handling for files whose
+extension does not match their actual contents. For example, a file
+named:
+
+    IMG_3954.heic
+
+that actually contains JPEG data can be recognized and displayed as JPEG
+rather than incorrectly being sent through the HEIC decoder.
+
+Some Apple Live Photo motion components are QuickTime/HEVC videos even when
+their files are named .heic (this can occur in exported or mounted Immich
+libraries). SDCodex-Gallery detects the real container from downloaded bytes and
+uses the video viewer instead of heic2any. Safari and other HEVC-capable
+environments may play the clip; Chrome, Firefox, and some Windows systems may
+show a specific unsupported Live Photo motion message. Open original or use
+the matching still image in that case. SDCodex-Gallery does not automatically pair
+Live Photo stills and motion clips.
+
+HEIC decoding is more CPU- and memory-intensive than displaying normal
+JPEG, PNG, or WebP images. Large collections of genuine HEIC files may
+therefore take longer to populate than JPEG-based galleries.
+
+GALLERY CONTROLS
+
+GRID / ALBUM VIEW
+
+Large grids render 100 media tiles first and keep no more than 300 media tiles
+in the page at once. The full scrollbar and viewer order are preserved as
+distant tiles are removed and recreated. A Back to Top button appears after
+scrolling. Home, End, Page Up/Down, and Arrow Up/Down scroll the gallery even
+after focus changes. Album folders confirmed to contain no direct media or child folders
+are hidden; folders that fail to scan remain visible.
+
+SORTING
+
+The sorting button beside By Folder shows the current sorting.
+Click it to cycle Newest, Oldest, Filename. Filename is the default.
+Newest/Oldest use the server's file modification date (HTTP Last-Modified),
+not when the photo was taken. Files with missing dates sort last by filename;
+equal dates use natural filename order. Folders remain first and alphabetical.
+Non-shuffled slideshows follow the selected order.
+
+Set "sort": "newest", "oldest", or "filename" in folderframe.config.json under
+defaults, index, or embed. Shared defaults apply to both; profile settings
+override them. Saved preferences win when enabled; ?sort=filename explicitly
+overrides them, and ?remember=0 lets you test config defaults.
+Date lookups use bounded HEAD requests and cache results for 24 hours in localStorage.
+The cache is capped at 2,000 entries per app/source, evicting oldest checked
+entries first. It survives reloads and browser restarts when storage is available;
+blocked/full storage falls back to a bounded in-memory cache. It is separate
+from remembered preferences, so remember=0 does not disable this metadata cache.
+Cached media URLs and dates remain on the device until replaced, evicted, or
+site storage is cleared; expired entries are discarded when date sorting runs.
+Refresh Folder reloads dates; Filename skips date lookups entirely.
+See CONFIGURATION.md for examples and server requirements.
+
+The sticky gallery header stays available while the grid scrolls. One root control
+combines the SDCodex-Gallery logo and source name, followed by a plain blue-chevron breadcrumb
+and an unboxed album/file count. Parent folders remain clickable and the current
+folder uses stronger text. Click or tap the combined root control to return to the current source’s top-level gallery. On narrow
+screens, middle breadcrumb segments collapse to an ellipsis while the source,
+last ancestor, current folder, and count remain visible. View, sort, thumbnail
+density, and Reload use separate glow-only controls whenever the complete header
+fits one row. As space narrows they move progressively into the three-dot menu,
+keeping the header on one line and Options anchored at the right edge. Grid and
+viewer headers use the same two tight translucent pills: one around the left
+identity/path cluster and one around the right controls, with no empty full-width
+capsule. Auto Refresh remains in that menu. The viewer uses the SDCodex-Gallery
+brand icon to return to the grid and the same glow-only interaction states.
+
+Album tiles preview the first image directly inside that folder, using the
+natural filename order regardless of the selected sort (2.jpg before 10.jpg).
+A blue folder badge and the album name distinguish covers from individual
+photos. Empty, video-only, nested-folder-only, or failed previews keep the
+folder icon. Covers do not recursively scan descendant albums.
+
+Previews load near the visible grid, with up to three album-preview jobs and
+two shared HEIC-processing jobs at once. HEIC previews are downscaled to a
+480-pixel maximum edge; other formats still use original images. No server-side
+thumbnail generation is required. Offscreen HEIC previews release their leases.
+Use Refresh Folder to reselect covers after changing files inside albums;
+unchanged background refreshes keep existing tiles. There is no cover.jpg
+override yet.
+
+-   The site opens in the thumbnail grid by default; configured autoplay opens the viewer.
+-   Click a photo or video to open the full viewer.
+-   Click an album card to enter that folder.
+-   Use the breadcrumb to navigate back through albums.
+-   Open the three-dot gallery menu for Refresh Folder/Reload Library and
+    Auto Refresh.
+-   Toggle “By Folder” / “All Pics” to switch between album browsing and
+    recursively showing media from the current folder and its subfolders.
+
+VIEWER NAVIGATION
+
+-   Left Arrow button: previous media
+-   Right Arrow button: next media
+-   Keyboard Left Arrow: previous media
+-   Keyboard Right Arrow: next media
+-   Gallery button: return to the thumbnail/album grid
+-   Press G or Escape to return to the thumbnail/album grid
+
+SLIDESHOW
+
+-   Click Play / Pause to start or stop the slideshow.
+-   Press Space to start/pause from the full viewer.
+-   Available intervals are: 3 seconds 5 seconds 10 seconds 15 seconds
+    30 seconds 60 seconds 5 minutes 15 minutes 60 minutes
+
+SHUFFLE
+
+-   Click Shuffle to toggle randomized slideshow progression.
+-   Press S while in the full viewer to toggle Shuffle.
+-   Manual Previous/Next navigation remains available.
+
+LOADING FEEDBACK
+
+Folder scans show a scanning/refreshing message; recursive scans report folders
+checked and files found (not a percentage). Existing tiles stay visible while
+refreshing, and unchanged refreshes do not recreate them. Thumbnail placeholders
+clear when previews load, or show Preview unavailable on failure.
+The viewer indicates Loading image, Preparing HEIC image, or Loading/Buffering
+video until ready. Empty folders and scan failures have separate messages.
+Controls-free slideshows hide loading indicators. Reduced-motion preferences
+are respected. These indicators do not reduce the original download/decode cost.
+
+BROWSER AND MOBILE SUPPORT
+
+Large-library loading is bounded and cancellable. Failed subfolders retain
+successful results and show a Retry scan warning. HEIC work uses two shared
+slots and separate viewer/480-pixel-preview caches. Browser-native JPEG, PNG,
+WebP, GIF, AVIF, and BMP display uses two full-resolution viewer slots plus
+twelve grid/album thumbnail slots, with album priority over grid work. See RESILIENCE.md for limits,
+stuck-decoder recovery, and the device-testing checklist. Deploy resilience.js
+with the other application files.
+
+SDCodex-Gallery is designed for modern desktop and mobile browsers, including
+Chrome/Edge/Firefox and Safari. Desktop and phone layouts have been manually
+tested and approved by the project owner; this is not a certified browser/version
+matrix. iOS Safari and other device/browser combinations still need separate
+verification, especially video playback, fullscreen, and embedded operation.
+
+- Touch: swipe fitted photos, pinch to zoom, and drag magnified photos to pan.
+- Full/TV Mode can request fullscreen, but availability depends on the browser,
+  device, user interaction, and iframe permissions. If fullscreen is unavailable,
+  the gallery can still run inside the page.
+- Video playback depends on codecs and autoplay policy. Sound may require a tap;
+  controls-free embeds mute videos. HEIC conversion can be slow on phones.
+- This is an online gallery, not an offline app. Keep the page visible for
+  unattended slideshows; background or locked-device playback is not guaranteed.
+- Private browsing or embedded storage restrictions may prevent preferences
+  from being remembered. Explicit config and URL options remain available.
+
+ZOOM AND PAN
+
+Swipe left/right on a fitted, unzoomed photo to browse. Once zoomed or panned,
+dragging pans instead; pinch gestures, short taps, and vertical swipes do not
+change photos. Swiping does not control videos or controls-free embeds.
+Returning to Gallery restores the originally opened tile and briefly highlights
+it, adjusting the scroll position if a refresh moved it.
+
+Set showFilenames to false in defaults, index, or embed to hide viewer filenames
+and grid media captions. Default: true. URL override: ?showFilenames=0 or 1.
+This setting is not saved in browser preferences; album names, accessible labels,
+and error details remain available. It is not a privacy or access-control feature.
+
+Set showDownloadButton or showCopyButton to false in defaults, index, or embed
+to hide those viewer actions. Both default to true. URL overrides are
+?download=0 or 1 and ?copy=0 or 1. Download targets the original served file.
+Copy Image puts the displayed photo on the clipboard as PNG, including converted
+HEIC, and is disabled for video. Cross-origin downloads may open instead of save;
+image clipboard access can depend on HTTPS, CORS, and iframe/browser permissions.
+Copy Image is disabled on ordinary http://LAN-IP pages. Use HTTPS or a
+browser-trusted localhost context for programmatic image clipboard writes.
+
+Primary viewer toolbar buttons are icon-only by default. Interval, Download,
+and Copy Image are grouped under the right-side three-dot options menu. Set
+showButtonLabels to true under defaults, index, or embed to show text on the
+primary buttons. URL override: ?buttonLabels=0 or 1. Tooltips and accessible
+names remain available when text is hidden.
+
+At narrow widths, the combined logo/source control and complete breadcrumb stay
+left-aligned while status and primary controls wrap together on the right. Middle
+breadcrumb segments collapse when necessary. Auto
+Refresh and manual reload remain in the three-dot menu. Routine timestamps are
+hidden while scan errors remain visible. The viewer uses compact,
+wrapping icon controls for playback, Rotate, Fit/Original, Full, and TV Mode.
+Reset Zoom is hidden
+at this width. To reset a magnified photo, switch Fit/Original; switch back to
+Fit if needed. Wider headers keep compact controls and wrap to use available space.
+The sizing button shows an icon with Fit or Original; Full toggles fullscreen.
+Long album breadcrumbs collapse their middle segments. Use the
+arrow buttons to change media; drag on a zoomed photo to pan it.
+The grid scrolls vertically, with a content-sized header and visible filenames.
+Photo pinch gestures zoom the image; page zoom remains available outside the photo.
+Controls suppress browser double-tap zoom so rapid taps on navigation buttons
+do not magnify the page. Pinch calculations use the stationary viewport to avoid
+feedback flicker. On desktop, long filenames truncate to leave room for controls;
+controls still wrap when the window is too narrow to fit them.
+
+Photos support: - Mouse wheel zoom - Touch pinch-to-zoom - Mouse/finger
+drag to pan - Rotate clockwise in 90-degree display-only steps - Reset Zoom
+button on wider layouts - Escape returns to the gallery
+
+IMAGE SIZING
+
+Use the image sizing button to switch between:
+
+    Original Size
+    Fit Screen
+
+The selected mode is remembered by the browser. Press Enter in the full
+viewer to switch between Fit Screen and Original Size.
+
+FULLSCREEN / THEATER MODE
+
+Use the Full button (beside TV Mode), or press F
+in the full viewer, to enter or leave browser fullscreen.
+
+While viewing media, controls and the mouse cursor fade after
+approximately 3 seconds of inactivity. Mouse, touch, or keyboard
+activity brings them back.
+
+TV / PHOTO-FRAME MODE
+
+TV Mode is intended for a television, wall display, tablet, or other
+dedicated photo-frame screen.
+
+Enabling TV Mode: - switches images to Fit Screen - enables Shuffle -
+enables Auto Refresh - starts the slideshow - attempts to enter browser
+fullscreen
+
+Press T in the full viewer to toggle TV Mode.
+
+Exiting fullscreen turns TV Mode off and pauses its slideshow. TV Mode is
+not saved in browser preferences; explicit tvMode config or tv=1 URL defaults
+still apply on reload. Use tv=0 to override those defaults.
+
+Browsers generally require a user gesture before true fullscreen is
+allowed, so automatic URL startup can configure TV behavior but may not
+be able to force fullscreen by itself.
+
+SAVED SETTINGS
+
+The gallery stores preferences in the browser’s localStorage.
+
+Settings such as the following can persist between visits: - current
+album - sorting - slideshow interval - image sizing mode - folder/all-pics view -
+Shuffle - Auto Refresh
+
+These preferences are local to that browser/device.
+
+Preferences are now separated by app location, source, and index/embed profile.
+The supplied embed profile ignores saved preferences. Use rememberPreferences
+in folderframe.config.json or the remember URL option to control persistence.
+See CONFIGURATION.md for settings and precedence.
+
+URL OPTIONS
+
+The gallery supports URL query parameters, which are useful for
+bookmarks and dedicated displays.
+
+Supported options:
+
+    profile=index or profile=embed
+        Select the configuration profile (index by default).
+
+    source=ID
+        Select a source defined in folderframe.config.json.
+
+    remember=0 or remember=1
+        Ignore or use saved browser preferences.
+
+    imageMode=fit or imageMode=original
+        Override the initial image sizing mode.
+
+    density=compact, density=comfortable, or density=spacious
+        Override the grid thumbnail size.
+
+    album=FOLDER
+        Open a specific album path.
+
+    interval=SECONDS
+        Set slideshow interval.
+        Valid values: 3, 5, 10, 15, 30, 60, 300, 900, 3600
+
+    shuffle=1 or shuffle=0
+        Enable or disable Shuffle.
+
+    autorefresh=0 or autorefresh=1
+        Disable or enable Auto Refresh.
+
+    view=all
+        Show media in the selected folder and all its subfolders.
+
+    view=folders
+        Show the normal folder/album view.
+
+    autoplay=1 or autoplay=0
+        Enter the viewer and start slideshow playback, or start paused in the grid.
+
+    tv=1 or tv=0
+        Enable TV/photo-frame behavior:
+        Fit Screen + Shuffle + Auto Refresh + slideshow playback.
+        Use tv=0 to disable TV mode; explicit URL options override the preset.
+
+Examples:
+
+Open the Family album:
+
+    http://SERVER-IP:PORT/?album=Family
+
+Open a nested album:
+
+    http://SERVER-IP:PORT/?album=Vacations/OBX%202026
+
+Start a shuffled 10-second slideshow:
+
+    http://SERVER-IP:PORT/?autoplay=1&shuffle=1&interval=10
+
+Start TV/photo-frame mode:
+
+    http://SERVER-IP:PORT/?tv=1&interval=10
+
+Open an album directly in TV mode:
+
+    http://SERVER-IP:PORT/?album=Family&tv=1&interval=10
+
+Replace SERVER-IP:PORT with the actual address of the machine hosting
+the gallery.
+
+EMBEDDING FOLDERFRAME
+
+SDCodex-Gallery can be embedded in another site with a standard iframe. This
+keeps its controls, styles, slideshow, and media handling isolated from the
+host page. The included embed.html file is a complete responsive example.
+
+Basic embed:
+
+For a controls-free slideshow, set controls to false and autoplay to true in
+the config file's embed section. Example section (keep the other sections):
+
+    "embed": {
+      "controls": false,
+      "autoplay": true,
+      "view": "all",
+      "interval": 10,
+      "rememberPreferences": false
+    }
+
+controls defaults to true and works under defaults, index, or embed.
+False hides the grid, title bar, navigation, progress, hints, video controls,
+and media-error cards. Keyboard shortcuts and photo gestures are disabled.
+Videos are muted; browser autoplay restrictions still apply. The viewer opens
+directly; autoplay starts the slideshow. Use view: "all" for subfolders.
+Failed files skip after 3 seconds during play; empty-library messages and
+config warnings remain visible. Controls visibility is not saved in preferences.
+Use ?profile=embed&controls=0&autoplay=1 to override via URL, or controls=1
+and reload to restore controls. See CONFIGURATION.md for the full reference.
+
+Basic iframe:
+
+    <div class="folderframe-embed">
+      <iframe
+        src="https://YOUR-FOLDERFRAME-SERVER/?profile=embed"
+        title="Photo and video gallery"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <style>
+    .folderframe-embed {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 420px;
+    }
+    .folderframe-embed iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 12px;
+    }
+    </style>
+
+The iframe URL accepts the same source, album, view, sort, interval, shuffle,
+autoplay, autorefresh, tv, imageMode, density, controls, showFilenames, download, copy,
+buttonLabels, and remember options. Use
+profile=embed to apply embed defaults from folderframe.config.json; otherwise
+the index defaults apply, even inside an iframe. Keyboard shortcuts work after
+the visitor clicks or focuses the embedded gallery.
+
+The web server hosting SDCodex-Gallery must permit framing. Remove or adjust an
+X-Frame-Options header that blocks the host page, and ensure any Content-
+Security-Policy frame-ancestors directive allows the site doing the embedding.
+Fullscreen and autoplay remain subject to browser policies.
+
+TROUBLESHOOTING
+
+NO MEDIA FILES DETECTED
+
+1.  Verify photos/ exists beside index.html.
+2.  Open /photos/ directly in the browser.
+3.  Confirm that a directory listing appears.
+4.  Confirm the files use supported extensions.
+5.  Verify directory listing or directory browsing is enabled for
+    /photos/ and its subfolders.
+6.  If using Python, make sure python3 -m http.server 8000 was started
+    from the SDCodex-Gallery project directory, not from inside photos/.
+
+CHANGES DO NOT APPEAR
+
+-   Click Refresh Folder.
+-   Verify Auto Refresh is enabled.
+-   Hard-refresh the browser if JavaScript/HTML/CSS files themselves
+    were changed.
+-   Confirm you edited the copy of the site that the active web server
+    is serving.
+
+HEIC IMAGE FAILS
+
+The viewer shows recovery guidance for image and video failures. Retry reloads
+the file, Next file moves on, Gallery returns to the grid, and Open original
+opens the source in a separate tab. A running slideshow skips failed media after
+3 seconds (or retries if there is only one file); Pause stops automatic skipping.
+Manual browsing does not advance automatically. Browser-blocked autoplay is reported separately
+from network and decoding errors. Originals are never modified.
+
+-   Open browser Developer Tools and check the Console.
+
+-   Check the Network tab and verify the image request returns HTTP 200.
+
+-   On Linux, inspect the real file type with:
+
+    file photos/filename.heic
+
+-   A .heic filename is not proof that the file actually contains HEIC
+    data.
+
+VIDEO FAILS
+
+A recognized filename can still contain a codec the browser cannot
+decode. Check the browser console for playback errors. Converting the
+video to a browser-friendly H.264/AAC MP4 is generally the most
+compatible option.
+
+PYTHON SERVER IS RUNNING BUT ANOTHER DEVICE CANNOT CONNECT
+
+-   Use the server’s LAN IP instead of localhost.
+-   Confirm TCP port 8000 is allowed by the host firewall.
+-   Confirm both devices can reach each other on the network.
+
+SECURITY NOTES
+
+The gallery does not provide authentication by itself.
+
+If the server is exposed outside your trusted LAN: - add authentication
+at the web-server/reverse-proxy layer - use HTTPS - do not expose a raw
+directory listing of private photos to the public Internet
+
+For a local-only family gallery, keeping the service accessible only
+from the trusted LAN is the simplest arrangement.
+
+SUPPORT FOLDERFRAME
+
+If SDCodex-Gallery is useful to you, you can support its continued development:
+
+    https://paypal.me/machogrog
+
+LICENSE
+
+SDCodex-Gallery is available under the MIT License. See LICENSE for details.
+
+## Refresh frequency and long slideshows
+
+`refreshInterval` sets automatic folder rescanning in **seconds**: index defaults
+to 120 (two minutes), embed to 300 (five minutes). Allowed values are integers
+from 1 to 86400. It is a config-only setting, not a saved browser preference
+or URL option. `autoRefresh: false` disables automatic rescanning.
+
+Set it under `defaults` for both profiles or under `index`/`embed` separately:
+
+```json
+"index": { "refreshInterval": 120 },
+"embed": { "refreshInterval": 300 }
+```
+
+This is a configuration fragment; keep your other sections and settings.
+Profile entries override shared defaults, including the explicit entries in
+the shipped file. Choose shorter refresh periods for frequently changing media
+and longer periods for stable photo-frame displays or many devices sharing one
+host. Each display scans independently. Refresh Folder still scans immediately;
+returning to a visible tab also triggers a scan when Auto Refresh is enabled.
+
+Slideshow `interval` is separate: 300, 900, and 3600 seconds appear as **5m**,
+**15m**, and **60m** in the viewer. These values also work in config, saved
+preferences, and the `interval` URL option. They control photo duration;
+videos advance on completion during a slideshow.
+
+Filename is now the default sort. Existing saved sort choices or explicit URL
+options still take precedence; use `?remember=0` to test config defaults.

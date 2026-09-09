@@ -1,0 +1,178 @@
+/* SDCodex Gallery — functional stylesheet.
+
+NOTE: This is a generated baseline stylesheet. The upstream FolderFrame
+project ships a full hand-tuned styles.css + docs/images assets that were not
+included in the initial repository upload. This file restores a clean, usable
+layout (viewer, thumbnail grid, header, and the SDCodex details panel) so the
+gallery works out of the box. Drop in the canonical styles.css alongside it if
+you want the original pixel-perfect look. */
+
+:root {
+  --bg: #050505;
+  --panel: #111;
+  --panel-2: #181818;
+  --text: #eee;
+  --text-dim: #9a9a9a;
+  --accent: #4a90d9;
+  --border: #333;
+  --grid-gap: 8px;
+  --grid-tile-min: 160px;
+  --header-h: 64px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+button, a, select { font: inherit; }
+
+/* Layout shell ------------------------------------------------------------- */
+#gallery-wrapper {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+}
+#media-viewport { position: absolute; inset: var(--header-h) 0 0 0; overflow: hidden; }
+#media-container {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: #000;
+}
+#gallery-image { max-width: 100%; max-height: 100%; object-fit: contain; position: relative; }
+#gallery-image.mode-fit { width: 100%; height: 100%; object-fit: contain; }
+#gallery-image.mode-original { width: auto; height: auto; }
+.grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+#gallery-video { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* Header ------------------------------------------------------------------- */
+.overlay { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+#overlay-header, #grid-header { height: var(--header-h); display: flex; align-items: center; }
+.ff-header { background: var(--panel); border-bottom: 1px solid var(--border); }
+.ff-header-left, .ff-header-right { display: flex; align-items: center; gap: 6px; }
+.ff-pill { padding: 6px 12px; }
+.header-left { display: flex; align-items: center; }
+.header-right { display: flex; align-items: center; justify-content: flex-end; }
+.viewer-file-meta { display: flex; flex-direction: column; line-height: 1.15; }
+.title-text { font-size: 15px; font-weight: 600; color: var(--text); }
+.index-text { font-size: 12px; color: var(--text-dim); }
+.button-label { margin-left: 4px; font-size: 13px; }
+
+/* Buttons ------------------------------------------------------------------ */
+.btn {
+  background: #232323; color: var(--text); border: 1px solid #3a3a3a;
+  border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px;
+}
+.btn:hover:not(:disabled) { background: #2e2e2e; }
+.btn:disabled { opacity: .45; cursor: default; }
+.ff-btn { display: inline-flex; align-items: center; gap: 5px; }
+.ff-btn-icon { width: 38px; height: 34px; padding: 0; justify-content: center; }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-secondary { background: #232323; color: var(--text); border-color: #3a3a3a; }
+
+/* Navigation arrows -------------------------------------------------------- */
+.nav-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%); z-index: 90;
+  background: rgba(20,20,20,.82); color: #fff; border: 0; border-radius: 50%;
+  width: 48px; height: 48px; cursor: pointer; opacity: 0; transition: opacity .2s;
+}
+.nav-left { left: 8px; } .nav-right { right: 8px; }
+#media-viewport:hover .nav-arrow, .nav-arrow:hover { opacity: 1; }
+
+/* Progress / slideshow ----------------------------------------------------- */
+#progress-container { position: fixed; bottom: 0; left: 0; right: 0; height: 3px; z-index: 80; }
+#progress-bar { width: 0; height: 100%; background: var(--accent); transition: width .2s; }
+#help-hint {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  color: var(--text-dim); font-size: 12px; z-index: 85; opacity: .75;
+}
+
+/* Viewer options menu ------------------------------------------------------ */
+.viewer-options { position: relative; }
+.viewer-options-menu {
+  position: absolute; right: 0; top: 100%; min-width: 210px; z-index: 300;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.55); padding: 6px 0;
+}
+.viewer-options-menu .btn { width: 100%; justify-content: flex-start; background: transparent; border: 0; }
+.viewer-options-menu .ff-btn { width: 100%; justify-content: flex-start; }
+.timer-control { display: flex; align-items: center; gap: 6px; padding: 4px 10px; }
+.timer-control label { color: var(--text-dim); font-size: 12px; }
+.custom-select {
+  background: #202020; color: var(--text); border: 1px solid #3a3a3a;
+  border-radius: 6px; padding: 4px 6px; font-size: 13px;
+}
+
+/* Thumbnail grid ----------------------------------------------------------- */
+#grid-view-container { position: absolute; inset: var(--header-h) 0 0 0; overflow: auto; }
+.grid-header { position: sticky; top: 0; z-index: 120; background: var(--panel); border-bottom: 1px solid var(--border); }
+.header-nav-container { height: auto; min-height: 56px; }
+.grid-header-main { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.brand-home { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 0; color: var(--text); cursor: pointer; }
+.source-root-label { font-size: 14px; font-weight: 600; }
+.gallery-path-bar { display: flex; align-items: center; gap: 4px; color: var(--text-dim); font-size: 13px; }
+.breadcrumb { display: inline-flex; align-items: center; gap: 4px; }
+.folder-path { color: var(--text-dim); font-size: 12px; }
+.grid-actions { display: flex; align-items: center; gap: 6px; }
+.grid-action-slot { display: inline-flex; }
+.grid-status-stack { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 12px; padding: 4px 12px; }
+.scan-status { color: var(--text-dim); }
+.scan-loading { color: var(--text-dim); font-size: 12px; padding: 6px 12px; }
+.scan-progress-track { height: 3px; width: 120px; background: #222; border-radius: 2px; }
+.scan-progress-fill { height: 100%; width: 0; background: var(--accent); }
+
+#thumbnail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(var(--grid-tile-min), 120px), 1fr));
+  gap: var(--grid-gap); padding: 12px;
+}
+.media-tile-slot { position: relative; }
+.grid-item {
+  position: relative; display: block; width: 100%; padding: 0; border: 0;
+  background: transparent; cursor: pointer; border-radius: 6px; overflow: hidden;
+  aspect-ratio: 1 / 1; background: #151515;
+}
+.grid-item.album-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.album-icon { width: 52px; height: 52px; border-radius: 50%; background: #262626; display: flex; align-items: center; justify-content: center; }
+.grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+.video-badge {
+  position: absolute; right: 6px; top: 6px; width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0,0,0,.72); display: none; align-items: center; justify-content: center;
+}
+.grid-item:hover .video-badge { display: flex; }
+.grid-item-caption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 6px;
+  background: rgba(0,0,0,.55); color: #fff; font-size: 11px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; display: none;
+}
+.grid-item:hover .grid-item-caption { display: block; }
+.tile-star {
+  position: absolute; left: 6px; top: 6px; width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,.6); border: 0; cursor: pointer; color: #f6c647; display: none;
+}
+.grid-item:hover .tile-star { display: flex; align-items: center; justify-content: center; }
+.album-cover { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+.heic-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 14px; }
+
+/* Loading / warnings ------------------------------------------------------- */
+.loading-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
+.loading-spinner {
+  width: 26px; height: 26px; border: 3px solid #333; border-top-color: var(--accent);
+  border-radius: 50%; animation: ffspin 0.8s linear infinite; margin-right: 8px;
+}
+@keyframes ffspin { to { transform: rotate(360deg); } }
+
+.warning-container { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; }
+.warning-card { max-width: 480px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.warning-card h2 { font-size: 18px; margin-top: 0; }
+.warning-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.configured-source-path { font-family: ui-monospace, monospace; background: #222; border-radius: 4px; padding: 0 6px; }
+
+/* Convert prompt ----------------------------------------------------------- */
+.convert-option-row, .convert-check-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.convert-format-label { font-size: 13px; color: var(--text-dim); }
+
+/* Generic utility ---------------------------------------------------------- */
+.hidden, [hidden] { display: none !important; }
+.back-to-top { position: fixed; right: 16px; bottom: 20px; z-index: 150; }
+
+@media (max-width: 640px) {
+  .button-label { display: none; }
+  #help-hint { display: none; }
+}

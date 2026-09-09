@@ -1,0 +1,24 @@
+{
+  "id": "gallery",
+  "name": "SDCodex Gallery",
+  "version": "2.0.0",
+  "description": "Disk-backed media gallery that scans folders directly, reads captions/.txt sidecars, SD prompts and ComfyUI workflows from image metadata, and downloads workflows as JSON.",
+  "author": "DeeplabSystems",
+  "repository": "https://github.com/DeeplabSystems/SDCodex-Gallery",
+  "entrypoint": "plugin:init_plugin",
+  "nav_items": [
+    {
+      "label": "Gallery",
+      "url": "/gallery2",
+      "icon": "fas fa-images"
+    }
+  ],
+  "volumes": [
+    {
+      "env_var": "GALLERY_ROOT",
+      "host_path": "./downloads",
+      "container_path": "/data/downloads",
+      "description": "Root folder that the gallery browses on disk (media, captions and metadata are read directly from here)."
+    }
+  ]
+}
