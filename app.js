@@ -1247,12 +1247,12 @@ function setInfoPanel(open) {
     if (open) {
         infoPanel.hidden = false;
         if (infoPanel.parentElement) infoPanel.parentElement.append(infoPanel);
-        btnInfo.setAttribute('aria-pressed', 'true');
+        if (btnInfo) btnInfo.setAttribute('aria-pressed', 'true');
     } else {
         infoPanel.hidden = true;
         btnDownloadWorkflow.hidden = true;
         cancelGalleryMetaLoad();
-        btnInfo.setAttribute('aria-pressed', 'false');
+        if (btnInfo) btnInfo.setAttribute('aria-pressed', 'false');
     }
 }
 
@@ -3215,6 +3215,10 @@ function setupEventListeners() {
     btnGridOptions.addEventListener('click', () => setGridOptionsOpen(gridOptionsMenu.hidden));
     if (btnInfo) {
         btnInfo.addEventListener('click', () => toggleInfoPanel());
+        btnDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
+        btnInfoDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
+    }
+    if (btnInfoClose) {
         btnInfoClose.addEventListener('click', () => setInfoPanel(false));
         btnDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
         btnInfoDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());

@@ -3,7 +3,7 @@
 {% block title %}Gallery - SD Codex{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-grey-icons">
+<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-caption-default-grey">
 {% endblock %}
 
 {% block content %}
@@ -79,11 +79,6 @@
                 <button id="btn-convert" class="btn btn-secondary ff-btn ff-btn-icon" title="Convert this image to another type" aria-label="Convert this image" disabled>
                     <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6.99 11 3 15l3.99 4v-3H13v-2H6.99v-3zM21 9l-3.99-4v3H11v2h6.01v3L21 9z"/></svg>
                     <span class="button-label">Convert</span>
-                </button>
-
-                <button id="btn-info" class="btn btn-secondary ff-btn ff-btn-icon" title="Show caption, SD prompt and generation info for this image" aria-label="Toggle image details" aria-pressed="false">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 6h4v2H4v4zm10 0h2v4h2v4H2v2zm2-10V14H1zm13 0h1v14H1v-14zM7 9h2v2H2v2z"/></svg>
-                    <span class="button-label">Info</span>
                 </button>
 
                 <div id="viewer-options" class="viewer-options">
@@ -339,5 +334,5 @@
 </script>
 <script src="{{ url_for('gallery2.static_asset', filename='resilience.js') }}?v=20260831-native-decode-queue"></script>
 <script src="{{ url_for('gallery2.static_asset', filename='settings.js') }}?v=20260904-manifest-refresh-default"></script>
-<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-viewer-modal"></script>
+<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-caption-default"></script>
 {% endblock %}

@@ -164,7 +164,7 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 .scan-status { font-size:11px; color:#777; min-width:72px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
 #thumbnail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--grid-tile-min,180px),1fr)); gap:18px; padding:116px 20px 40px; }
 .grid-item { position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; background:#111; border:1px solid rgba(255,255,255,.08); cursor:pointer; transition:transform .2s,border-color .2s,box-shadow .2s; color:inherit; padding:0; }
-.grid-item:hover { transform:scale(1.025); border-color:rgba(59,130,246,.55); box-shadow:0 10px 22px rgba(0,0,0,.5); }
+.grid-item:hover { transform:scale(1.025); border-color:var(--border); box-shadow:0 10px 22px rgba(0,0,0,.5); }
 .virtual-spacer { grid-column:1 / -1; width:100%; pointer-events:none; }
 .virtual-window { display:contents; }
 .back-to-top { position:fixed; right:max(18px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); z-index:30; box-shadow:0 8px 24px rgba(0,0,0,.6); }
@@ -1281,10 +1281,10 @@ dialog,
     left: var(--ff-shell-inset-x, 14px);
     right: var(--ff-shell-inset-x, 14px);
     z-index: 1000;
-    border-radius: 16px;
+    border-radius: 14px;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    box-shadow: 0 6px 20px var(--shadow-soft, rgba(0,0,0,.35));
+    box-shadow: none;
     color: var(--text);
     max-width: calc(100% - 2 * var(--ff-shell-inset-x, 14px));
 }
@@ -1295,6 +1295,11 @@ dialog,
     left: var(--ff-shell-inset-x, 14px);
     right: var(--ff-shell-inset-x, 14px);
     width: auto;
+}
+/* Compact autohiding viewer toolbar (slender, no drop shadow). */
+#overlay-header {
+    min-height: 44px;
+    padding: 5px 12px;
 }
 /* In the scrolling grid, the toolbar stays pinned below the navbar with a gap. */
 @media (max-width: 900px) { #grid-header { position: sticky; top: var(--ff-shell-gap, 12px); } }
