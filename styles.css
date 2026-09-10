@@ -1447,7 +1447,7 @@ dialog,
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    z-index: 900;
+    z-index: 1900;
     display: block;
     pointer-events: auto;
 }
@@ -1462,17 +1462,18 @@ dialog,
 #gallery-wrapper.viewer-open #viewer-modal {
     position: fixed;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 64px;
+    transform: translateX(-50%);
     width: min(calc(100% - 40px), 1640px);
-    height: min(calc(100% - 40px), 92vh);
+    height: calc(100vh - 64px - 20px);
+    max-height: 96vh;
     background: transparent;
     color: var(--text);
     border: 0;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: none;
-    z-index: 1000;
+    z-index: 2000;
 }
 /* Default / grid mode: the floating panel is hidden entirely. */
 #gallery-wrapper:not(.viewer-open) #viewer-modal { display: none; }

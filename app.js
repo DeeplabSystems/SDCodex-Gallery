@@ -2847,7 +2847,10 @@ function enterFullScreenViewer(index) {
     };
     isGridViewActive = false;
     syncViewerModal();
-    gridViewContainer.style.display = 'none';
+    // Barely the grid is KEPT rendered (not display:none) so the fixed, blurred
+    // viewer-backdrop has real page content behind it to blur — giving the
+    // captioning-style blurred transparency around the image. The backdrop's
+    // pointer-events:auto keeps the grid inert while the viewer is open.
     viewport.style.display = 'flex';
     $('overlay-header').style.display = 'flex';
     navLeft.style.display = 'flex';
