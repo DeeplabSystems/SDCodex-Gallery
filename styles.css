@@ -1304,8 +1304,8 @@ dialog,
 }
 /* Compact autohiding viewer toolbar (slender, no drop shadow). */
 #overlay-header {
-    min-height: 44px;
-    padding: 5px 12px;
+    min-height: 36px;
+    padding: 3px 10px;
 }
 /* In the scrolling grid, the toolbar stays pinned below the navbar with a gap. */
 @media (max-width: 900px) { #grid-header { position: sticky; top: var(--ff-shell-gap, 12px); } }
@@ -1449,7 +1449,10 @@ dialog,
 }
 #gallery-wrapper:not(.viewer-open) #viewer-backdrop { display: none; }
 
-/* The viewer group becomes a centered card (the captioning modal look). */
+/* The viewer group becomes a centered floating panel (captioning modal look).
+   The modal shell itself is TRANSPARENT: it only positions the two panes.
+   The image floats over the dimmed backdrop (all the way transparent outside
+   the media), while the details panel is a solid rounded card on the right. */
 #gallery-wrapper.viewer-open #viewer-modal {
     position: absolute;
     left: 50%;
@@ -1457,32 +1460,35 @@ dialog,
     transform: translate(-50%, -50%);
     width: min(calc(100% - 40px), 1640px);
     height: min(calc(100% - 40px), 92vh);
-    background: var(--card-bg);
+    background: transparent;
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 24px 60px var(--shadow-soft, rgba(0, 0, 0, .45));
+    box-shadow: none;
     z-index: 1000;
 }
 /* Default / grid mode: the floating panel is hidden entirely. */
 #gallery-wrapper:not(.viewer-open) #viewer-modal { display: none; }
 
-/* Media pane: left column of the card, true black (letterbox like captioning). */
+/* Media pane: left column of the card. Fully transparent so the dimmed
+   backdrop shows through outside the viewed image (no black letterbox). */
 #gallery-wrapper.viewer-open #media-viewport {
     position: absolute;
     top: 0;
     left: 0;
     bottom: 0;
     right: var(--gallery-info-w, 360px);
-    background: var(--media-bg, #000);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
 }
 
-/* Details panel: right rail of the card, full height, no overlay gap. */
+/* Details panel: a solid rounded card on the right (the only solid surface of
+   the viewer). Full-height so no grey/gap ever shows under it; clips to the
+   floating panel's rounded corners via the shell's overflow + border-radius. */
 #gallery-wrapper.viewer-open #info-panel {
     position: absolute;
     top: 0;
@@ -1493,17 +1499,39 @@ dialog,
     color: var(--text);
     overflow: auto;
     z-index: 200;
+    border: 1px solid var(--border);
     border-left: 1px solid var(--border);
+    border-radius: 20px 20px 20px 20px;
     padding: 16px 18px;
 }
 
-/* Viewer toolbar stays inside the media column of the card. */
+/* Viewer toolbar stays inside the media column of the card. Slim: smaller
+   buttons + tighter padding so the floating panel's top bar reads as a tidy
+   subtitle rather than a chunky taskbar. */
 #gallery-wrapper.viewer-open #overlay-header {
     position: absolute;
     top: var(--ff-shell-gap, 12px);
     left: var(--ff-shell-inset-x, 14px);
     right: var(--gallery-info-w, 360px);
     width: auto;
+    min-height: 34px;
+    padding: 3px 10px;
+    --ff-btn-height: 30px;
+    --ff-icon-size: 16px;
+}
+#gallery-wrapper.viewer-open #overlay-header .btn,
+#gallery-wrapper.viewer-open #overlay-header .ff-btn {
+    height: 30px;
+    min-height: 30px;
+}
+#gallery-wrapper.viewer-open #overlay-header .btn.ff-btn-icon {
+    width: 30px;
+}
+#gallery-wrapper.viewer-open #overlay-header #media-title {
+    font-size: 13px;
+}
+#gallery-wrapper.viewer-open #overlay-header #media-index {
+    font-size: 12px;
 }
 
 /* Nav arrows anchored inside the media column. */

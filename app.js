@@ -1247,17 +1247,13 @@ function infoRelPath(filepath) {
 }
 
 function setInfoPanel(open) {
+    // The details panel is a permanent fixture of the floating viewer: it can
+    // never be hidden. Ignoring `open === false` keeps it always visible so
+    // there is no grey gap / broken-corner state underneath it.
     if (!infoPanel) return;
-    if (open) {
-        infoPanel.hidden = false;
-        if (infoPanel.parentElement) infoPanel.parentElement.append(infoPanel);
-        if (btnInfo) btnInfo.setAttribute('aria-pressed', 'true');
-    } else {
-        infoPanel.hidden = true;
-        btnDownloadWorkflow.hidden = true;
-        cancelGalleryMetaLoad();
-        if (btnInfo) btnInfo.setAttribute('aria-pressed', 'false');
-    }
+    infoPanel.hidden = false;
+    if (infoPanel.parentElement) infoPanel.parentElement.append(infoPanel);
+    if (btnInfo) btnInfo.setAttribute('aria-pressed', 'true');
 }
 
 function toggleInfoPanel() {

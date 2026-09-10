@@ -3,7 +3,7 @@
 {% block title %}Gallery - SD Codex{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-bright-hover">
+<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-perma-panel">
 {% endblock %}
 
 {% block content %}
@@ -150,12 +150,9 @@
 
         
 
-        <aside id="info-panel" class="info-panel" aria-label="Image details" hidden>
+        <aside id="info-panel" class="info-panel" aria-label="Image details">
             <div class="info-panel-head">
                 <span class="info-panel-title">Details</span>
-                <button id="btn-info-close" class="btn btn-secondary ff-btn ff-btn-icon" type="button" aria-label="Close details" title="Close details">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5.33 6.5l1.34 1.34L8 12.67l1.34-1.34L5.33 6.5zM13.33 6.5l-1.34 1.34L16 12.67l-1.34-1.34z"/></svg>
-                </button>
             </div>
             <div id="info-file-name" class="info-section info-file-name"></div>
             <div class="info-loading" id="info-loading" role="status">Reading file metadata…</div>
@@ -341,5 +338,5 @@
 </script>
 <script src="{{ url_for('gallery2.static_asset', filename='resilience.js') }}?v=20260831-native-decode-queue"></script>
 <script src="{{ url_for('gallery2.static_asset', filename='settings.js') }}?v=20260904-manifest-refresh-default"></script>
-<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-caption-this"></script>
+<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-perma-panel"></script>
 {% endblock %}
