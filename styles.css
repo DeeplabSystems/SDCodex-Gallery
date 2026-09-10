@@ -1197,6 +1197,9 @@ button, select, .media-error-actions a { touch-action:manipulation; }
     --ff-glow-hover: rgba(128,128,128,.22);
     --ff-glow-active: rgba(128,128,128,.30);
     --ff-glow-on:    rgba(0,96,227,.30);
+    /* Floating-shell geometry (gap below navbar + horizontal inset). */
+    --ff-shell-gap: 12px;
+    --ff-shell-inset-x: 14px;
     /* Force scrollbars to follow the theme. */
     color-scheme: light dark;
 }
@@ -1268,27 +1271,34 @@ dialog,
     border: 1px solid var(--border);
 }
 
-/* ── Header row (attached to the main header) ─────────────────────────────── */
-/* Docked toolbar background resembles the core app's blurred navbar. */
+/* ── Floating toolbars ────────────────────────────────────────────────────────
+   Both toolbars float as rounded cards just below the core navbar (matching
+   the core app's modal/card style) instead of docking flush against it. */
 #overlay-header,
 #grid-header {
     position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: var(--ff-shell-gap, 12px);
+    left: var(--ff-shell-inset-x, 14px);
+    right: var(--ff-shell-inset-x, 14px);
     z-index: 1000;
-    border-radius: 0;
-    box-shadow: none;
-    /* Match the core app's navbar surface exactly. */
+    border-radius: 16px;
     background: var(--card-bg);
-    border-bottom: 1px solid var(--border);
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px var(--shadow-soft, rgba(0,0,0,.35));
     color: var(--text);
+    max-width: calc(100% - 2 * var(--ff-shell-inset-x, 14px));
 }
-/* Within the viewer, the header docks flush under the navbar. */
-#overlay-header { position: absolute; top: 0; left: 0; right: 0; width: auto; }
-/* In the scrolling grid, the toolbar stays pinned under the navbar. */
-@media (max-width: 900px) { #grid-header { position: sticky; top: 0; } }
-@media (max-width: 560px) { #grid-header { position: sticky; top: 0; } }
+/* Within the viewer, the toolbar floats over the media at a top gap. */
+#overlay-header {
+    position: absolute;
+    top: var(--ff-shell-gap, 12px);
+    left: var(--ff-shell-inset-x, 14px);
+    right: var(--ff-shell-inset-x, 14px);
+    width: auto;
+}
+/* In the scrolling grid, the toolbar stays pinned below the navbar with a gap. */
+@media (max-width: 900px) { #grid-header { position: sticky; top: var(--ff-shell-gap, 12px); } }
+@media (max-width: 560px) { #grid-header { position: sticky; top: var(--ff-shell-gap, 12px); } }
 
 /* ── Buttons: give the FolderFrame controls the app's accent/text colors ─── */
 .ff-btn.btn,
@@ -1329,20 +1339,19 @@ dialog,
 /* ── Image details panel (caption / SD prompt / workflow) ─────────────────── */
 #info-panel {
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(360px, 40vw);
+    top: var(--ff-shell-gap, 12px);
+    right: var(--ff-shell-inset-x, 14px);
+    bottom: var(--ff-shell-gap, 12px);
+    width: min(380px, 42vw);
     background: var(--card-bg);
     color: var(--text);
     overflow: auto;
     z-index: 200;
-    box-shadow: 0 0 22px var(--shadow-soft, rgba(0,0,0,.3));
-    border-left: 1px solid var(--border);
-    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 26px var(--shadow-soft, rgba(0,0,0,.4));
+    padding: 16px 18px;
     font-family: inherit;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
 }
 #info-panel .info-panel-head {
     display: flex;

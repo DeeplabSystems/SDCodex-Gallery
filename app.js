@@ -1292,9 +1292,9 @@ async function loadMediaMetadata(filepath, { force = false } = {}) {
     const query = new URLSearchParams({ folder: rel.folder, file: rel.file });
     try {
         const response = await resilience.request(`./api/meta?${query}`, {
-            signal: controller.signal, timeout: 15000, cache: 'no-store'
+            signal: controller.signal, timeout: 15000, cache: 'no-store', body: 'json'
         });
-        const meta = await response.json();
+        const meta = response;
         if (controller.signal.aborted) return;
         if (!meta || meta.ok === false) {
             infoLoading.hidden = true;
