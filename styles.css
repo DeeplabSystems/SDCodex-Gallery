@@ -1437,12 +1437,16 @@ dialog,
    `#gallery-wrapper.viewer-open` (toggled by syncViewerModal in app.js).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Dimmed backdrop shown only while the viewer is active (sits behind the card). */
+/* Dimmed, BLURRED backdrop shown only while the viewer is active (captioning-
+   style blurred transparency). Full-viewport so the whole page behind the
+   floating image is darkened and blurred exactly like the captioning modal. */
 #gallery-wrapper.viewer-open #viewer-backdrop,
 #gallery-wrapper.viewer-open > #viewer-backdrop {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .5);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     z-index: 900;
     display: block;
     pointer-events: auto;
@@ -1451,10 +1455,12 @@ dialog,
 
 /* The viewer group becomes a centered floating panel (captioning modal look).
    The modal shell itself is TRANSPARENT: it only positions the two panes.
-   The image floats over the dimmed backdrop (all the way transparent outside
-   the media), while the details panel is a solid rounded card on the right. */
+   The image floats over the dimmed, blurred backdrop (captioning-style blurred
+   transparency outside the media), while the details panel is a solid rounded
+   card on the right. `position: fixed` centers it over the full-viewport
+   backdrop just like the captioning modal. */
 #gallery-wrapper.viewer-open #viewer-modal {
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
