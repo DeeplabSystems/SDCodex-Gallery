@@ -24,9 +24,20 @@ live from the filesystem every time you open a folder.
 - **Fits the SD Codex header** — the gallery is rendered inside the core app
   layout (`base.html`), keeping the SD Codex navbar/theme, with the gallery's
   controls docked into a header row just below it. No standalone page.
-- **Details panel** — opening an image auto-opens the **Info** panel showing
-  its caption, SD prompt, negative prompt and generation settings, with a
-  **Download Workflow** action when a ComfyUI workflow is embedded.
+- **Floating viewer panel** — viewing an image opens it as a hover-style
+  floating panel (media on the left, details on the right) over a dimmed,
+  blurred backdrop, exactly like the captioning modal. The panel sits below
+  the SD Codex navbar, and the area outside the image is transparent so the
+  blurred page shows through.
+- **Details panel (always open)** — the details card on the right is a
+  permanent fixture of the viewer (it cannot be closed). It shows the caption,
+  SD prompt, negative prompt and generation settings, with a **Download
+  Workflow** button when a ComfyUI workflow is embedded.
+- **Caption this Image** — when the **ComfyCaption** plugin is installed, the
+  details panel shows a **Caption this Image** button that captions the
+  currently-viewed image with your configured LM Studio vision model and
+  writes the result to the image's `.txt` sidecar in place. The gallery reads
+  the sidecar, so the new caption appears immediately.
 
 Everything is read live from disk and image metadata — there are no saves, no
 gallery tables, and no "save to gallery" flow.
@@ -40,6 +51,23 @@ gallery appears in the sidebar as **Gallery** at `/gallery2`.
 
 - `GALLERY_ROOT`: the folder the gallery browses on disk
   (defaults to `./downloads` on the host / `/data/downloads` in the container).
+
+## Caption this Image
+
+When the **ComfyCaption** plugin is installed, the viewer's details panel adds
+a **Caption this Image** button. Clicking it captions the image on screen with
+your LM Studio vision model:
+
+1. `/api/caption-target` resolves the gallery file to its absolute
+   container-side folder/file.
+2. `/api/check-connection` (ComfyCaption) discovers your running LM Studio
+   model if none is saved.
+3. `/api/caption-single` (ComfyCaption) runs the vision model and writes the
+   caption to `<basename>.txt` beside the image.
+
+The LM Studio API URL, prompt, trigger tag and model are shared with the
+ComfyCaption page via browser `localStorage`. The first caption after LM
+Studio has idled may take ~30–60 s while the model reloads.
 
 ## Development layout
 
@@ -69,6 +97,7 @@ The Flask blueprint is mounted at `/gallery2`:
 | `GET /browse/…` | HTML autoindex of a folder, or a media file |
 | `GET /api/meta?folder=&file=` | Caption + SD prompt + workflow presence |
 | `GET /api/caption?folder=&file=` | Caption text |
+| `GET /api/caption-target?folder=&file=` | Absolute container folder/file for the ComfyCaption plugin |
 | `GET /api/prompt?folder=&file=` | SD positive / negative / settings |
 | `GET /api/workflow?folder=&file=` | Downloads the embedded ComfyUI workflow |
 
