@@ -210,7 +210,7 @@ def collect_image_metadata(image_path):
     """Return everything the viewer panel needs for one image."""
     if not image_path or not os.path.isfile(image_path):
         return {"ok": False, "error": "File not found"}
-    caption = read_sidecar_caption(image_path) or read_embedded_caption(image_path)
+    caption = read_sidecar_caption(image_path)
     sd = read_sd_prompt(image_path)
     workflow = extract_comfy_workflow(image_path)
     return {
@@ -339,7 +339,7 @@ def caption():
     image_path = resolve_media(folder, file_name)
     if not image_path:
         return jsonify({"error": "Invalid or missing file"}), 404
-    caption = read_sidecar_caption(image_path) or read_embedded_caption(image_path)
+    caption = read_sidecar_caption(image_path)
     return jsonify({"file": file_name, "caption": caption, "hasCaption": bool(caption)})
 
 
