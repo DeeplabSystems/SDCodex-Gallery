@@ -8,7 +8,7 @@
 #scan-failures .btn { margin:6px 0 0; }
 .brand-logo { display:block; width:120px; height:40px; object-fit:contain; flex:0 0 auto; }
 .brand-home { display:flex; align-items:center; justify-content:center; flex:0 0 auto; min-height:44px; padding:0; border:0; border-radius:8px; background:transparent; cursor:pointer; }
-.brand-home:hover { background:rgba(255,255,255,.06); }
+.brand-home:hover { background:rgba(128,128,135,.22); }
 .hide-filenames #media-title, .hide-filenames .grid-item-caption { display:none; }
 .returned-tile { outline:3px solid #93c5fd; outline-offset:-3px; }
 .loading-note { position:absolute; bottom:15%; left:50%; transform:translateX(-50%); z-index:6; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:20px; background:rgba(15,23,42,.9); color:#cbd5e1; font-size:13px; max-width:90%; pointer-events:none; }
@@ -149,7 +149,7 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 }
 .crumb:hover {
     color:#fff;
-    background:rgba(96,165,250,.14);
+    background:rgba(128,128,135,.22);
     text-decoration:none;
 }
 .crumb:last-child {
@@ -164,7 +164,7 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 .scan-status { font-size:11px; color:#777; min-width:72px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
 #thumbnail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--grid-tile-min,180px),1fr)); gap:18px; padding:116px 20px 40px; }
 .grid-item { position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; background:#111; border:1px solid rgba(255,255,255,.08); cursor:pointer; transition:transform .2s,border-color .2s,box-shadow .2s; color:inherit; padding:0; }
-.grid-item:hover { transform:scale(1.025); border-color:var(--border); box-shadow:0 10px 22px rgba(0,0,0,.5); }
+.grid-item:hover { transform:scale(1.025); border-color:rgba(210,210,216,.75); box-shadow:0 10px 22px rgba(0,0,0,.5); }
 .virtual-spacer { grid-column:1 / -1; width:100%; pointer-events:none; }
 .virtual-window { display:contents; }
 .back-to-top { position:fixed; right:max(18px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); z-index:30; box-shadow:0 8px 24px rgba(0,0,0,.6); }
@@ -1192,10 +1192,10 @@ button, select, .media-error-actions a { touch-action:manipulation; }
     --ff-info:       var(--info);
     --ff-text-strong: var(--text);
     --ff-pill-bg:    var(--card-bg);
-    /* Neutral translucent overlays read on both light and dark surfaces. */
-    --ff-glow:       rgba(128,128,128,.14);
-    --ff-glow-hover: rgba(128,128,128,.22);
-    --ff-glow-active: rgba(128,128,128,.30);
+    /* Neutral translucent overlays — theme-aware, bright enough to read. */
+    --ff-glow:       rgba(128,128,135,.16);
+    --ff-glow-hover: rgba(128,128,135,.30);
+    --ff-glow-active: rgba(116,120,128,.42);
     --ff-glow-on:    rgba(0,96,227,.30);
     /* Floating-shell geometry (gap below navbar + horizontal inset). */
     --ff-shell-gap: 12px;
@@ -1205,6 +1205,12 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 }
 :root[data-theme='dark'] { color-scheme: dark; }
 :root[data-theme='light'] { color-scheme: light; }
+/* Dark surface shows a brighter neutral so the hovers stay clearly visible. */
+:root[data-theme='dark'] {
+    --ff-glow:       rgba(255,255,255,.10);
+    --ff-glow-hover: rgba(255,255,255,.22);
+    --ff-glow-active: rgba(255,255,255,.32);
+}
 
 /* ── Shell: fill everything below the core navbar ─────────────────────────── */
 html, body { height: auto; overflow: auto; }
