@@ -114,7 +114,7 @@ button, select, .media-error-actions a { touch-action:manipulation; }
     box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
 }
 .path-icon {
-    color:#60a5fa;
+    color:var(--text-secondary);
     display:flex;
     align-items:center;
     flex:0 0 auto;
@@ -183,11 +183,11 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 #btn-viewer-star[aria-pressed="true"] { color:#fbbf24; }
 #btn-stars[aria-pressed="true"] svg { color:#fbbf24; }
 .album-card { display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(145deg,#111827,#0b0b0d); }
-.album-icon { color:#60a5fa; opacity:.9; margin-bottom:8px; }
+.album-icon { color:var(--text-secondary); opacity:.9; margin-bottom:8px; }
 .album-name { max-width:85%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; font-weight:700; }
 .album-subtitle { color:#6b7280; font-size:11px; margin-top:4px; }
 .album-card .album-cover { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
-.has-album-cover .album-icon { position:absolute; top:10px; left:10px; margin:0; padding:6px; display:flex; background:rgba(5,10,20,.8); border:1px solid rgba(96,165,250,.5); border-radius:8px; z-index:2; opacity:1; }
+.has-album-cover .album-icon { position:absolute; top:10px; left:10px; margin:0; padding:6px; display:flex; background:rgba(5,10,20,.8); border:1px solid var(--border); border-radius:8px; z-index:2; opacity:1; }
 .has-album-cover .album-icon svg { width:22px; height:22px; }
 .has-album-cover .album-name { position:absolute; bottom:0; left:0; right:0; max-width:100%; padding:32px 10px 12px; background:linear-gradient(transparent,rgba(0,0,0,.92)); text-align:left; z-index:1; }
 .has-album-cover .album-subtitle { display:none; }
@@ -598,7 +598,7 @@ button, select, .media-error-actions a { touch-action:manipulation; }
 #grid-header .brand-home { min-width:0; min-height:40px; padding:0 5px 0 0; gap:0; }
 #grid-header .brand-logo { width:120px; height:40px; }
 #grid-header .path-group-separator { color:#64748b; flex:0 0 auto; font-weight:700; padding:0 5px; }
-#grid-header .crumb-separator { color:#60a5fa; padding:0 3px; }
+#grid-header .crumb-separator { color:var(--text-secondary); padding:0 3px; }
 #grid-header .path-root-separator { flex:0 0 auto; order:0; }
 #grid-header .source-root-label { color:#dbeafe; font-size:13px; font-weight:700; white-space:nowrap; }
 #grid-header .brand-home:hover .source-root-label,
@@ -1315,7 +1315,7 @@ dialog,
 .brand-home { gap: 6px; min-height: 40px; }
 .ff-brand-icon {
     font-size: 14px;
-    color: var(--primary);
+    color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
