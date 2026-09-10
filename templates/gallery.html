@@ -3,11 +3,13 @@
 {% block title %}Gallery - SD Codex{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-app-theme">
+<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-viewer-modal">
 {% endblock %}
 
 {% block content %}
     <div id="gallery-wrapper">
+        <div id="viewer-backdrop" class="viewer-backdrop"></div>
+        <div id="viewer-modal" class="viewer-modal">
         <div id="media-viewport">
             <div id="media-container">
                 <img id="gallery-image" alt="Gallery Image" draggable="false" style="display:none;">
@@ -302,6 +304,7 @@
             </div>
             <div id="info-error" class="info-error" hidden></div>
         </aside>
+        </div>
     </div>
 
     <p id="config-notice" role="status" hidden></p>
@@ -325,5 +328,5 @@
 </script>
 <script src="{{ url_for('gallery2.static_asset', filename='resilience.js') }}?v=20260831-native-decode-queue"></script>
 <script src="{{ url_for('gallery2.static_asset', filename='settings.js') }}?v=20260904-manifest-refresh-default"></script>
-<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260906-convert-overlap"></script>
+<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-viewer-modal"></script>
 {% endblock %}

@@ -48,6 +48,13 @@ function stopViewerSession() {
     clearTimeout(viewerSession.timer);
     viewerSession = null;
 }
+/* Toggle the floating "hovering panel" viewer look (captioning-modal style):
+   dims the page behind and floats the media as a centered card. Driven off the
+   grid/viewer state so there is a single source of truth. */
+function syncViewerModal() {
+    if (typeof wrapper === 'undefined' || !wrapper) return;
+    wrapper.classList.toggle('viewer-open', !isGridViewActive);
+}
 function stopGridSession() {
     stopAlbumPreviews();
     if (!gridSession) return;
@@ -1876,6 +1883,7 @@ function handleMissingFolder(folder) {
     currentFolder = parent;
     missingFolderRecovery = { folder, parent };
     isGridViewActive = true;
+    syncViewerModal();
     viewport.style.display = 'none';
     gridViewContainer.style.display = controlsEnabled ? 'flex' : 'none';
     thumbnailGrid.innerHTML = '';
@@ -2222,6 +2230,7 @@ async function navigateToFolder(folder, { historyMode = 'push' } = {}) {
     gridViewContainer.scrollTop = 0;
     currentIndex = 0;
     isGridViewActive = true;
+    syncViewerModal();
     stopSlideshow();
     const succeeded = await loadGallery({ preserveView: false });
     if (succeeded === false && currentFolder === folder) {
@@ -2285,6 +2294,7 @@ function renderGridView() {
     mediaFailed = false;
     videoErrorOverlay.style.display = 'none';
     isGridViewActive = true;
+    syncViewerModal();
     thumbnailGrid.innerHTML = '';
     const total = mediaFiles.length;
     const albums = galleryViewMode === 'folders' ? subfolders.length : 0;
@@ -2756,6 +2766,7 @@ function enterFullScreenViewer(index) {
         file: mediaFiles[index], scrollTop: gridViewContainer.scrollTop || 0
     };
     isGridViewActive = false;
+    syncViewerModal();
     gridViewContainer.style.display = 'none';
     viewport.style.display = 'flex';
     $('overlay-header').style.display = 'flex';

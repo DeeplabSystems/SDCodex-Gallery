@@ -1397,3 +1397,104 @@ dialog,
 
 /* ── Utility icons used by the de-branded controls ───────────────────────── */
 .ff-back-icon, .ff-brand-icon { line-height: 1; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Viewer as a floating hovering panel (captioning-modal style)
+   ───────────────────────────────────────────────────────────────────────────
+   When the media viewer is open the grid is hidden and the page is dimmed
+   behind a centered, rounded card: media on the left, details on the right —
+   the info panel no longer overlaps the image. All rules are gated on
+   `#gallery-wrapper.viewer-open` (toggled by syncViewerModal in app.js).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Dimmed backdrop shown only while the viewer is active (sits behind the card). */
+#gallery-wrapper.viewer-open #viewer-backdrop,
+#gallery-wrapper.viewer-open > #viewer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 900;
+    display: block;
+    pointer-events: auto;
+}
+#gallery-wrapper:not(.viewer-open) #viewer-backdrop { display: none; }
+
+/* The viewer group becomes a centered card (the captioning modal look). */
+#gallery-wrapper.viewer-open #viewer-modal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(calc(100% - 40px), 1640px);
+    height: min(calc(100% - 40px), 92vh);
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px var(--shadow-soft, rgba(0, 0, 0, .45));
+    z-index: 1000;
+}
+/* Default / grid mode: the floating panel is hidden entirely. */
+#gallery-wrapper:not(.viewer-open) #viewer-modal { display: none; }
+
+/* Media pane: left column of the card, true black (letterbox like captioning). */
+#gallery-wrapper.viewer-open #media-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: var(--gallery-info-w, 360px);
+    background: var(--media-bg, #000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Details panel: right rail of the card, full height, no overlay gap. */
+#gallery-wrapper.viewer-open #info-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--gallery-info-w, 360px);
+    background: var(--card-bg);
+    color: var(--text);
+    overflow: auto;
+    z-index: 200;
+    border-left: 1px solid var(--border);
+    padding: 16px 18px;
+}
+
+/* Viewer toolbar stays inside the media column of the card. */
+#gallery-wrapper.viewer-open #overlay-header {
+    position: absolute;
+    top: var(--ff-shell-gap, 12px);
+    left: var(--ff-shell-inset-x, 14px);
+    right: var(--gallery-info-w, 360px);
+    width: auto;
+}
+
+/* Nav arrows anchored inside the media column. */
+#gallery-wrapper.viewer-open #nav-left { left: 20px; }
+#gallery-wrapper.viewer-open #nav-right { right: var(--gallery-info-w, 360px); }
+
+/* Progress bar + help hint constrained to the media column. */
+#gallery-wrapper.viewer-open #progress-container { right: var(--gallery-info-w, 360px); }
+#gallery-wrapper.viewer-open #help-hint { bottom: 20px; left: calc((100% - var(--gallery-info-w, 360px)) / 2); }
+
+/* Warnings / convert dialogs must sit above the floating viewer card. */
+#gallery-wrapper.viewer-open #warning-overlay,
+#gallery-wrapper.viewer-open #convert-overlay { z-index: 1100; }
+
+/* On narrow screens the info rail shrinks so the media still gets most of the card. */
+@media (max-width: 700px) {
+    #gallery-wrapper.viewer-open #viewer-modal { width: min(calc(100% - 16px), 820px); }
+    #gallery-wrapper.viewer-open #media-viewport,
+    #gallery-wrapper.viewer-open #overlay-header,
+    #gallery-wrapper.viewer-open #nav-right,
+    #gallery-wrapper.viewer-open #progress-container { right: min(300px, 46vw); }
+    #gallery-wrapper.viewer-open #info-panel { width: min(300px, 46vw); border-left: 1px solid var(--border); }
+    #gallery-wrapper.viewer-open #help-hint { left: calc((100% - min(300px, 46vw)) / 2); }
+}
