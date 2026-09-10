@@ -752,6 +752,10 @@ const infoSdSetting = $('info-sd-setting');
 const infoError = $('info-error');
 const btnDownloadWorkflow = $('btn-download-workflow');
 const infoWorkflowSection = $('info-workflow-section');
+// "Caption this Image" (only present when the ComfyCaption plugin is installed).
+const btnCaptionThis = $('btn-caption-this');
+const captionThisLabel = btnCaptionThis ? $('caption-this-label') : null;
+const captionThisStatus = $('caption-this-status');
 const btnInfoDownloadWorkflow = $('btn-info-download-workflow');
 let currentMetadataFile = null; // { folder, file } of the image whose metadata is shown
 let galleryMetaSession = null;
@@ -1276,6 +1280,86 @@ function showInfoLoading(fileName) {
     infoError.textContent = '';
     infoLoading.hidden = false;
     btnDownloadWorkflow.hidden = true;
+}
+
+// ── "Caption this Image" (ComfyCaption plugin) ─────────────────────────────
+// Shown only when the captioning plugin is installed. Captions the currently
+// displayed media through the captioning plugin's own /api/caption-single, so
+// all captioning logic stays in that plugin (single source of truth).
+async function captionCurrentImage() {
+    if (!btnCaptionThis || mediaFiles.length <= 0) return;
+    const tooltip = btnCaptionThis.title;
+    const rel = infoRelPath(mediaFiles[currentIndex]);
+    if (!rel.file) return;
+
+    const setStatus = (text, ok = true, err = false) => {
+        if (!captionThisStatus) return;
+        captionThisStatus.style.display = '';
+        captionThisStatus.textContent = text;
+        captionThisStatus.style.color = err ? 'var(--danger)' : (ok ? 'var(--text-secondary)' : '');
+    };
+
+    captionThisLabel.textContent = 'Captioning…';
+    btnCaptionThis.disabled = true;
+    setStatus('');
+
+    try {
+        // 1. Resolve this gallery file to the absolute container folder/file.
+        const params = new URLSearchParams({ folder: rel.folder, file: rel.file });
+        const target = await resilience.request(`./api/caption-target?${params}`, {
+            signal: new AbortController().signal, timeout: 15000, cache: 'no-store', body: 'json'
+        });
+        if (!target.ok) throw new Error(target.error || 'Could not resolve image path');
+
+        // 2. Gather captioning settings (mirrors the captioning page).
+        const lmStudioUrl = localStorage.getItem('captionLmStudioUrl') || 'http://localhost:1234/v1';
+        const prompt = localStorage.getItem('captionPrompt') || 'Caption this image';
+        const triggerTag = localStorage.getItem('captionTriggerTag') || '';
+        let model = localStorage.getItem('captionModel') || '';
+
+        // 3. Pick a model id from the running LM Studio server when possible.
+        if (!model) {
+            try {
+                const conn = await resilience.request('/api/check-connection', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lmStudioUrl }),
+                    signal: new AbortController().signal, timeout: 8000, cache: 'no-store', body: 'json'
+                });
+                if (conn && conn.connected && Array.isArray(conn.models) && conn.models.length) {
+                    model = conn.models[0].id;
+                }
+            } catch (_) { /* model discovery is best-effort */ }
+        }
+
+        // 4. Run the caption via the captioning plugin.
+        const res = await resilience.request('/api/caption-single', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                folderPath: target.folderPath,
+                fileName: target.fileName,
+                prompt,
+                lmStudioUrl,
+                model,
+                triggerTag
+            }),
+            signal: new AbortController().signal, timeout: 180000, cache: 'no-store', body: 'json'
+        });
+
+        if (res && res.caption) {
+            // The gallery reads captions from the <basename>.txt sidecar that
+            // the captioning plugin just wrote — refresh the details panel.
+            await loadMediaMetadata(mediaFiles[currentIndex], { force: true });
+            setStatus('Caption updated.');
+        } else {
+            throw new Error(res?.error || 'Captioning returned no caption');
+        }
+    } catch (err) {
+        console.error('Caption this image failed:', err);
+        setStatus('Captioning failed: ' + (err.message || err), false, true);
+    } finally {
+        if (captionThisLabel) captionThisLabel.textContent = 'Caption this Image';
+        btnCaptionThis.disabled = false;
+    }
 }
 
 function renderInfoMeta(meta) {
@@ -3222,6 +3306,9 @@ function setupEventListeners() {
         btnInfoClose.addEventListener('click', () => setInfoPanel(false));
         btnDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
         btnInfoDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
+    }
+    if (btnCaptionThis) {
+        btnCaptionThis.addEventListener('click', captionCurrentImage);
     }
     viewport.addEventListener('wheel', handleWheel, { passive: false });
     viewport.addEventListener('mousedown', handleMouseDown);

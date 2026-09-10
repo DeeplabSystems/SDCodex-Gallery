@@ -3,11 +3,12 @@
 {% block title %}Gallery - SD Codex{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-caption-default-grey">
+<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-caption-this">
 {% endblock %}
 
 {% block content %}
-<div id="gallery-wrapper">
+{% set caption_plugin_installed = installed_plugins is defined and installed_plugins|selectattr('id','equalto','comfy-caption')|list|length > 0 %}
+<div id="gallery-wrapper" {% if caption_plugin_installed %}data-caption-plugin="1"{% endif %}>
         <div id="viewer-backdrop" class="viewer-backdrop"></div>
         <div id="viewer-modal" class="viewer-modal">
         <div id="media-viewport">
@@ -160,6 +161,12 @@
             <div class="info-loading" id="info-loading" role="status">Reading file metadata…</div>
             <div class="info-section-title">Caption</div>
             <div id="info-caption" class="info-text info-caption"></div>
+            {% if caption_plugin_installed %}
+            <button id="btn-caption-this" class="btn btn-secondary ff-btn caption-this-btn" type="button" title="Caption this image using the Captioning plugin">
+                <i class="fas fa-magic me-1"></i><span id="caption-this-label">Caption this Image</span>
+            </button>
+            <div id="caption-this-status" class="info-text" style="display:none;"></div>
+            {% endif %}
             <div class="info-section-title">SD Prompt</div>
             <div id="info-sd-prompt" class="info-text info-sd"></div>
             <div class="info-section-title">SD Negative Prompt</div>
@@ -334,5 +341,5 @@
 </script>
 <script src="{{ url_for('gallery2.static_asset', filename='resilience.js') }}?v=20260831-native-decode-queue"></script>
 <script src="{{ url_for('gallery2.static_asset', filename='settings.js') }}?v=20260904-manifest-refresh-default"></script>
-<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-caption-default"></script>
+<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-caption-this"></script>
 {% endblock %}

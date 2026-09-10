@@ -343,6 +343,28 @@ def caption():
     return jsonify({"file": file_name, "caption": caption, "hasCaption": bool(caption)})
 
 
+@gallery.route("/api/caption-target")
+def caption_target():
+    """Resolve a gallery file into the absolute container folder/file the
+    ComfyCaption plugin's ``/api/caption-single`` endpoint expects.
+
+    The gallery addresses media relative to its browse root; the captioning
+    plugin wants an absolute ``folderPath`` + ``fileName``. This endpoint hands
+    the captioning plugin exactly that so the viewer's "Caption this Image"
+    button can point at the file currently on screen.
+    """
+    folder = request.args.get("folder", "")
+    file_name = request.args.get("file", "")
+    image_path = resolve_media(folder, file_name)
+    if not image_path:
+        return jsonify({"ok": False, "error": "Invalid or missing file"}), 404
+    return jsonify({
+        "ok": True,
+        "folderPath": os.path.dirname(image_path),
+        "fileName": os.path.basename(image_path),
+    })
+
+
 @gallery.route("/api/prompt")
 def prompt():
     folder = request.args.get("folder", "")

@@ -1400,6 +1400,25 @@ dialog,
 #info-panel .info-error { color: var(--danger); font-size: 12px; margin-top: 12px; }
 #info-panel .info-workflow-section button { margin-top: 6px; }
 
+/* "Caption this Image" button (only present when ComfyCaption is installed). */
+#info-panel .caption-this-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    width: 100%;
+    height: 38px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+}
+#info-panel .caption-this-btn:hover:not(:disabled) { background: var(--bg); color: var(--text); }
+#info-panel .caption-this-btn:disabled { opacity: .55; }
+#info-panel .info-text#caption-this-status { margin-top: 4px; font-size: 12px; }
+
 /* ── Utility icons used by the de-branded controls ───────────────────────── */
 .ff-back-icon, .ff-brand-icon { line-height: 1; }
 
