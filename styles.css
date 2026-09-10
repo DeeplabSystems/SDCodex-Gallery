@@ -1462,11 +1462,11 @@ dialog,
 #gallery-wrapper.viewer-open #viewer-modal {
     position: fixed;
     left: 50%;
-    top: 64px;
+    top: 96px;
     transform: translateX(-50%);
     width: min(calc(100% - 40px), 1640px);
-    height: calc(100vh - 64px - 20px);
-    max-height: 96vh;
+    height: calc(100vh - 96px - 16px);
+    max-height: 94vh;
     background: transparent;
     color: var(--text);
     border: 0;

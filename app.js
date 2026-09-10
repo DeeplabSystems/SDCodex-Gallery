@@ -3298,14 +3298,15 @@ function setupEventListeners() {
     btnGridOptions.addEventListener('click', () => setGridOptionsOpen(gridOptionsMenu.hidden));
     if (btnInfo) {
         btnInfo.addEventListener('click', () => toggleInfoPanel());
-        btnDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
-        btnInfoDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
     }
     if (btnInfoClose) {
         btnInfoClose.addEventListener('click', () => setInfoPanel(false));
-        btnDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
-        btnInfoDownloadWorkflow.addEventListener('click', () => downloadCurrentWorkflow());
     }
+    // Workflow download buttons must be wired regardless of whether the old
+    // btn-info / btn-info-close buttons exist (they were removed when the
+    // details panel became permanent) — otherwise download does nothing.
+    btnDownloadWorkflow?.addEventListener('click', () => downloadCurrentWorkflow());
+    btnInfoDownloadWorkflow?.addEventListener('click', () => downloadCurrentWorkflow());
     if (btnCaptionThis) {
         btnCaptionThis.addEventListener('click', captionCurrentImage);
     }

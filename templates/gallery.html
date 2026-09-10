@@ -3,7 +3,7 @@
 {% block title %}Gallery - SD Codex{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-grid-blur">
+<link rel="stylesheet" href="{{ url_for('gallery2.static_asset', filename='styles.css') }}?v=20260910-dl-fix">
 {% endblock %}
 
 {% block content %}
@@ -338,5 +338,5 @@
 </script>
 <script src="{{ url_for('gallery2.static_asset', filename='resilience.js') }}?v=20260910-detail-err"></script>
 <script src="{{ url_for('gallery2.static_asset', filename='settings.js') }}?v=20260904-manifest-refresh-default"></script>
-<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-grid-blur"></script>
+<script src="{{ url_for('gallery2.static_asset', filename='app.js') }}?v=20260910-dl-fix"></script>
 {% endblock %}
