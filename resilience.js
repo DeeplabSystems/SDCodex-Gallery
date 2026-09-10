@@ -7,6 +7,19 @@
         new Error('HTTP ' + response.status),
         { name: 'HTTPError', status: response.status, url }
     );
+    // Surface the server's own error message (e.g. from JSON error responses)
+    // so callers can show a specific reason instead of a bare "HTTP 400".
+    async function httpErrorDetailed(response, url) {
+        let detail = '';
+        try {
+            const text = await response.text();
+            if (text) {
+                try { detail = JSON.parse(text).error || ''; } catch { detail = text; }
+            }
+        } catch (_) { /* body read is best-effort */ }
+        const msg = detail ? 'HTTP ' + response.status + ': ' + detail : 'HTTP ' + response.status;
+        return Object.assign(new Error(msg), { name: 'HTTPError', status: response.status, url, detail });
+    }
 
     // Deadline includes response body consumption; cancellation also rejects mocks/
     // servers that fail to honor the fetch signal. Late completions are ignored.
@@ -27,7 +40,7 @@
                 (async () => {
                     if (signal?.aborted) throw abortError();
                     const response = await fetch(url, { ...options, signal: controller.signal });
-                    if (!response.ok) throw httpError(response, url);
+                    if (!response.ok) throw await httpErrorDetailed(response, url);
                     return await response[body]();
                 })()
             ]);
