@@ -21,9 +21,12 @@ live from the filesystem every time you open a folder.
 - **ComfyUI workflow download** — detects the `workflow`/`prompt` stored in the
   image (PNG text chunks or EXIF `UserComment`) and downloads it as a
   `<name>_workflow.json` file.
-- **Details panel** — open any image and press the **Info** button in the
-  viewer header to see its caption, SD prompt, negative prompt, generation
-  settings, and a **Download Workflow** action.
+- **Fits the SD Codex header** — the gallery is rendered inside the core app
+  layout (`base.html`), keeping the SD Codex navbar/theme, with the gallery's
+  controls docked into a header row just below it. No standalone page.
+- **Details panel** — opening an image auto-opens the **Info** panel showing
+  its caption, SD prompt, negative prompt and generation settings, with a
+  **Download Workflow** action when a ComfyUI workflow is embedded.
 
 Everything is read live from disk and image metadata — there are no saves, no
 gallery tables, and no "save to gallery" flow.

@@ -21,7 +21,7 @@ import os
 from html import escape
 from urllib.parse import unquote
 
-from flask import Blueprint, Response, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, Response, jsonify, render_template, request, send_file, send_from_directory
 from PIL import Image
 
 try:
@@ -29,10 +29,19 @@ try:
 except Exception:  # sd-prompt-reader is optional; SD prompt just reads as absent
     ImageDataReader = None
 
-import piexif
-import piexif.helper
+try:
+    import piexif
+    import piexif.helper
+except Exception:  # piexif optional (EXIF workflow extraction just degrades)
+    piexif = None
+    piexif.helper = None
 
 gallery = Blueprint("gallery2", __name__)
+
+# Point the blueprint at this plugin's templates/ directory so the gallery can
+# extend the core ``base.html`` (keeping the SD Codex header) like the other
+# plugins. Sibling modules may also render it via the shared Jinja loader.
+gallery.template_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
 # --------------------------------------------------------------------------- #
 #  Path / root resolution
@@ -247,7 +256,9 @@ def _listing_html(root, rel_dir):
 # --------------------------------------------------------------------------- #
 @gallery.route("/")
 def index():
-    return send_from_directory(_plugin_dir(), "index.html", mimetype="text/html")
+    # Rendered through the core layout so the SD Codex header/navbar is kept,
+    # matching how the other plugin pages look inside the app.
+    return render_template("gallery.html")
 
 
 @gallery.route("/folderframe.config.json")

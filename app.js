@@ -2764,7 +2764,12 @@ function enterFullScreenViewer(index) {
     progressContainer.style.display = 'block';
     helpHint.style.display = 'block';
     showMedia(index);
-    if (openingViewer) showUI();
+    if (openingViewer) {
+        showUI();
+        // Auto-open the details panel so the caption / SD prompt / ComfyUI
+        // workflow for the opened image are visible immediately.
+        setInfoPanel(true);
+    }
 }
 
 function showMedia(index) {
@@ -2806,7 +2811,9 @@ function showMedia(index) {
     mediaIndex.textContent = `${currentIndex + 1} / ${mediaFiles.length}`;
     updateMediaActions(filepath, filename);
     updateViewerStarState();
-    if (!infoPanel.hidden) loadMediaMetadata(filepath);
+    // Always read caption / SD prompt / ComfyUI workflow for the shown file so
+    // the details panel is populated (it auto-opens in enterFullScreenViewer).
+    loadMediaMetadata(filepath);
 
     const playVideoSource = (source, livePhoto = false, objectUrl = null) => {
         if (!isCurrent()) { if (objectUrl) URL.revokeObjectURL(objectUrl); return; }
