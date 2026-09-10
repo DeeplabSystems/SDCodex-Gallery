@@ -1,3 +1,4 @@
+pillow-heif
 sd-prompt-reader
 piexif
 Pillow
