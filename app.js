@@ -1316,11 +1316,14 @@ async function captionCurrentImage() {
         // 3. Pick a model id from the running LM Studio server when possible.
         if (!model) {
             try {
-                const conn = await resilience.request('/api/check-connection', {
+                // NOTE: raw fetch (not resilience.request) — the resilience
+                // request API uses the same `body` key for the request body and
+                // the response mode, so a JSON request body is silently dropped
+                // (last `body: 'json'` wins) and Flask 400s on the empty body.
+                const conn = await fetch('/api/check-connection', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lmStudioUrl }),
-                    signal: new AbortController().signal, timeout: 8000, cache: 'no-store', body: 'json'
-                });
+                    body: JSON.stringify({ lmStudioUrl })
+                }).then(r => r.json().catch(() => null));
                 if (conn && conn.connected && Array.isArray(conn.models) && conn.models.length) {
                     model = conn.models[0].id;
                 }
@@ -1328,7 +1331,10 @@ async function captionCurrentImage() {
         }
 
         // 4. Run the caption via the captioning plugin.
-        const res = await resilience.request('/api/caption-single', {
+        // Raw fetch (see note above): resilience.request would drop the JSON
+        // body due to the `body` key collision, sending an empty body that
+        // Flask rejects with a 400 Bad Request.
+        const res = await fetch('/api/caption-single', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 folderPath: target.folderPath,
@@ -1337,9 +1343,8 @@ async function captionCurrentImage() {
                 lmStudioUrl,
                 model,
                 triggerTag
-            }),
-            signal: new AbortController().signal, timeout: 180000, cache: 'no-store', body: 'json'
-        });
+            })
+        }).then(r => r.json().catch(() => null));
 
         if (res && res.caption) {
             // The gallery reads captions from the <basename>.txt sidecar that
